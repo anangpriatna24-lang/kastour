@@ -19,14 +19,10 @@
       </div>
       <form id="loginForm" class="space-y-3">
         <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-1">Email</label>
-          <input type="email" id="loginEmail" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
-        </div>
-        <div>
           <label class="block text-sm font-semibold text-gray-700 mb-1">Password</label>
           <input type="password" id="loginPassword" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
         </div>
-        <button type="submit" id="btnLogin" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-2 rounded-lg transition">
+        <button type="submit" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-2 rounded-lg transition">
           Masuk
         </button>
         <p id="loginError" class="text-red-500 text-sm text-center hidden"></p>
@@ -76,10 +72,12 @@
 
     let allData = [];
 
-    // Cek session
-    async function cekSession() {
-      const { data: { session } } = await db.auth.getSession();
-      if (session) {
+    // Password admin (GANTI INI kalau perlu)
+    const ADMIN_PASSWORD = 'kas2026admin';
+
+    // Cek session (pakai localStorage, simpel)
+    function cekSession() {
+      if (localStorage.getItem('kas_admin') === 'true') {
         tampilkanDashboard();
       } else {
         document.getElementById('loginPage').classList.remove('hidden');
@@ -88,33 +86,24 @@
     }
 
     // Login
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    document.getElementById('loginForm').addEventListener('submit', (e) => {
       e.preventDefault();
-      const btn = document.getElementById('btnLogin');
+      const pass = document.getElementById('loginPassword').value;
       const errEl = document.getElementById('loginError');
-      btn.textContent = 'Memuat...';
-      btn.disabled = true;
-      errEl.classList.add('hidden');
 
-      const email = document.getElementById('loginEmail').value;
-      const password = document.getElementById('loginPassword').value;
-
-      const { error } = await db.auth.signInWithPassword({ email, password });
-
-      if (error) {
-        errEl.textContent = 'Login gagal: ' + error.message;
+      if (pass === ADMIN_PASSWORD) {
+        localStorage.setItem('kas_admin', 'true');
+        errEl.classList.add('hidden');
+        tampilkanDashboard();
+      } else {
+        errEl.textContent = 'Password salah!';
         errEl.classList.remove('hidden');
-        btn.textContent = 'Masuk';
-        btn.disabled = false;
-        return;
       }
-
-      tampilkanDashboard();
     });
 
     // Logout
-    async function logout() {
-      await db.auth.signOut();
+    function logout() {
+      localStorage.removeItem('kas_admin');
       location.reload();
     }
 
@@ -212,4 +201,4 @@
   </script>
 
 </body>
-</html>
+  </html>
